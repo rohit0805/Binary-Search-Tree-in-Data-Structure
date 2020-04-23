@@ -18,14 +18,16 @@ void inorder(struct node *root){
 	inorder(root->right);
 }
 int lca(struct node *root,int d1,int d2){
-	if(root->data>=d1 && root->data<=d2)
-		return root->data;
-	else if(root->data>d1 &&root->data>d2){
-		return lca(root->left,d1,d2);
+	while(root!=NULL){
+		if(root->data >d1 && root->data>n2){
+			root=root->left;
+		}
+		else if(root->data<d1 && root->data<d2)
+			root=root->right;
+		else
+			break;
 	}
-	else
-		return lca(root->right,d1,d2);
-	return root->data;
+	return root;
 }
 struct node* insert(struct node* node, int key)
 {
@@ -49,8 +51,8 @@ int main(){
 	insert(root,14);
 	cout<<"Inorder traversal of tree\n";	
 	inorder(root);
-	cout<<"LCA of 10 and 14: "<<lca(root,10,14)<<endl;
-	cout<<"LCA of 8 and 14: "<<lca(root,8,14)<<endl;
-	cout<<"LCA of 10 and 22: "<<lca(root,10,22)<<endl;
+	cout<<"LCA of 10 and 14: "<<lca(root,10,14)->data<<endl;
+	cout<<"LCA of 8 and 14: "<<lca(root,8,14)->data<<endl;
+	cout<<"LCA of 10 and 22: "<<lca(root,10,22)->data<<endl;
 	return 0;
 }
