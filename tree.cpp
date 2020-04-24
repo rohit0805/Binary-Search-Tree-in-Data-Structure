@@ -17,16 +17,6 @@ void inorder(struct node *root){
 	cout<<root->data<<" ";
 	inorder(root->right);
 }
-int lca(struct node *root,int d1,int d2){
-	if(root->data>=d1 && root->data<=d2)
-		return root->data;
-	else if(root->data>d1 &&root->data>d2){
-		return lca(root->left,d1,d2);
-	}
-	else
-		return lca(root->right,d1,d2);
-	return root->data;
-}
 struct node* insert(struct node* node, int key)
 {
     if (node == NULL) 
@@ -37,20 +27,57 @@ struct node* insert(struct node* node, int key)
         node->right = insert(node->right, key);
     return node;
 }
-
+int floor(struct node *root,int x){
+	int ans=-1;
+	while(root!=NULL){
+		if(root->data>x)
+			root=root->left;
+		else if(root->data < x){
+			ans=root->data;
+			root=root->right;
+		}
+		else{
+			ans=root->data;
+			break;
+		}
+	}
+	return ans;
+}
+int ceil(struct node *root,int x){
+	int ans=INT_MAX;
+	while(root!=NULL){
+		if(root->data>x){
+			ans=root->data;
+			root=root->left;
+		}
+		else if(root->data<x){
+			root=root->right;
+		}
+		else{
+			ans=root->data;
+			break;
+		}
+	}
+	return ans;
+}
 int main(){
 	struct node *root=NULL;
-	root=insert(root,20);
-	insert(root,8);
-	insert(root,22);
-	insert(root,4);	
+	root=insert(root,10);
+	insert(root,5);
+	insert(root,15);
 	insert(root,12);	
-	insert(root,10);	
-	insert(root,14);
+	insert(root,30);
+	
 	cout<<"Inorder traversal of tree\n";	
 	inorder(root);
-	cout<<"LCA of 10 and 14: "<<lca(root,10,14)<<endl;
-	cout<<"LCA of 8 and 14: "<<lca(root,8,14)<<endl;
-	cout<<"LCA of 10 and 22: "<<lca(root,10,22)<<endl;
+	cout<<"\nEnter the number whose floor you want to find: ";
+	int x;
+	cin>>x;
+	cout<<floor(root,x)<<endl;
+
+	cout<<"\nEnter the number whose ceil you want to find: ";
+	cin>>x;
+	cout<<ceil(root,x)<<endl;
+
 	return 0;
 }
