@@ -18,33 +18,33 @@ void preorder(struct node *root){
 	preorder(root->left);
 	preorder(root->right);
 }
-int height(struct node *root){
+int height(struct node* root){
 	if(root==NULL)
 		return 0;
-	return 1+max(height(root->left),height(root->right));
+	return root->height;
+}
+struct node* leftrotate(struct node *root){
+	struct node *ret=root->right,*temp=ret->left;
+	ret->left=root;
+	root->right=temp;
+	root->height=1+max(height(root->left),height(root->right));
+	ret->height=1+max(height(ret->left),height(ret->right));
+	
+	return ret;
+}
+struct node *rightrotate(struct node *root){
+	struct node *ret=root->left,*temp=ret->right;
+	ret->right=root;
+	root->left=temp;
+	root->height=1+max(height(root->left),height(root->right));
+	ret->height=1+max(height(ret->left),height(ret->right));
+	
+	return ret;
 }
 int getbalance(struct node *root){
 	if(root==NULL)
 		return 0;
 	return height(root->left)-height(root->right);
-}
-struct node* rightrotate(struct node *root){
-	struct node *temp=root->left->right,*ret=root->left;
-	ret->right=root;
-	root->left=temp;
-
-	root->height=1+max(height(root->left),height(root->right));
-	ret->height=1+max(height(ret->left),height(ret->right));
-	return ret;
-}
-struct node* leftrotate(struct node *root){
-	struct node *temp=root->right->left,*ret=root->right;
-	root->right->left=root;
-	root->right=temp;
-
-	root->height=1+max(height(root->left),height(root->right));
-	ret->height=1+max(height(ret->left),height(ret->right));
-	return ret;
 }
 struct node* insert(struct node *root,int data){
 	if(root==NULL)
@@ -55,39 +55,98 @@ struct node* insert(struct node *root,int data){
 		root->right=insert(root->right,data);
 	else
 		return root;
-	//updating the position
+	
+	//update the height
 	root->height=1+max(height(root->left),height(root->right));
 	int balance=getbalance(root);
 
 	//left-left
-	if(balance>=2 && data < root->left->data)
+	if(balance>=2 && root->left->data > data)
 		return rightrotate(root);
 	//right-right
-	if(balance<=-2 && data>root->right->data)
+	if(balance<=-2 && root->right->data < data)
 		return leftrotate(root);
 	//left-right
-	if(balance>=2 && data> root->left->data){
+	if(balance>=2 && root->left->data < data){
 		root->left=leftrotate(root->left);
 		return rightrotate(root);
 	}
-	//right-left
-	if(balance<=-2 && data<root->right->data){
+	if(balance<=-2 && root->right->data > data){
 		root->right=rightrotate(root->right);
 		return leftrotate(root);
 	}
 	return root;
 }
-
+struct node* minvalue(struct node *root){
+	struct node *current=root;
+	while(current->left!=NULL)
+		current=current->left;
+	return current;
+}
+struct node* deletenode(struct node *root,int data){
+	if(root==NULL)
+		return root;
+	else if(root->data>data)
+		root->left=deletenode(root->left,data);
+	else if(root->data<data)
+		root->right=deletenode(root->right,data);
+	else{
+		if(root->left==NULL || root->right==NULL){
+			struct node *temp=root->left?root->left:root->right;
+			if(temp==NULL){
+				temp=root;
+				root=NULL;
+			}
+			else{
+				*root=*temp;
+			}
+			free(temp);
+		}
+		else{
+			struct node* temp=minvalue(root->right);
+			root->data=temp->data;
+			root->right=deletenode(root->right,temp->data);
+		}
+	}
+	//If the tree had only one node
+	if(root==NULL)
+		return root;
+	
+	root->height=1+max(height(root->left),height(root->right));
+	int balance=getbalance(root);
+	//left-left
+	if(balance>=2 && getbalance(root->left)>=0)
+		return rightrotate(root);
+	//right-right
+	if(balance<=-2 && getbalance(root->right)<=0)
+		return leftrotate(root);
+	//left-right
+	if(balance>=2 && getbalance(root->left)<0){
+		root->left=leftrotate(root->left);
+		return rightrotate(root);
+	}
+	//right-left
+	if(balance<=-2 && getbalance(root->right)>0){
+		root->right=rightrotate(root->right);
+		return leftrotate(root);
+	}
+	return root;
+}
 int main(){
 	struct node *root=NULL;
-	root=insert(root,10);
-	root=insert(root,20);
-	root=insert(root,30);
-	root=insert(root,40);
-	root=insert(root,50);	
-	root=insert(root,25);	
-	cout<<"Inorder traversal of tree\n";	
+	root = insert(root, 9);  
+    root = insert(root, 5);  
+    root = insert(root, 10);  
+    root = insert(root, 0);  
+    root = insert(root, 6);  
+    root = insert(root, 11);  
+    root = insert(root, -1);  
+    root = insert(root, 1);  
+    root = insert(root, 2);
+	cout<<"Preorder traversal of tree\n";	
 	preorder(root);
-
+	root=deletenode(root,10);
+	cout<<"\nPreorder traversal of tree\n";
+	preorder(root);
 	return 0;
 }
