@@ -3,10 +3,12 @@ using namespace std;
 struct node{
 	int data;
 	struct node *left,*right;
+	int count;
 };
 struct node *create(int data){
 	struct node *newnode=(struct node*)malloc(sizeof(struct node));
 	newnode->data=data;
+	newnode->count=1;
 	newnode->left=newnode->right=NULL;
 	return newnode;
 }
@@ -14,43 +16,90 @@ void inorder(struct node *root){
 	if(root==NULL)
 		return ;
 	inorder(root->left);
-	cout<<root->data<<" ";
+	cout<<root->data<<"("<<root->count<<")"<<" ";
 	inorder(root->right);
 }
-int lca(struct node *root,int d1,int d2){
-	if(root->data>=d1 && root->data<=d2)
-		return root->data;
-	else if(root->data>d1 &&root->data>d2){
-		return lca(root->left,d1,d2);
+
+struct node* insert(struct node* root,int data){
+	if(root==NULL)
+		return create(data);
+	else if(data==root->data){
+		root->count++;
+		return root;
 	}
-	else
-		return lca(root->right,d1,d2);
-	return root->data;
+	else if(data<root->data)
+		root->left=insert(root->left,data);
+	else if(data>root->data)
+		root->right=insert(root->right,data);
+	
+	return root;
 }
-struct node* insert(struct node* node, int key)
-{
-    if (node == NULL) 
-        return create(key);
-    if (key < node->data)
-        node->left = insert(node->left, key);
-    else
-        node->right = insert(node->right, key);
-    return node;
+struct node* minvalue(struct node *root){
+	struct node *current=root;
+	while(current->left!=NULL)
+		current=current->left;
+	return current;
+}
+struct node* deletenode(struct node *root,int data){
+	if(root==NULL)
+		return NULL;
+	else if(root->data>data)
+		root->left=deletenode(root->left,data);
+	else if(root->data<data)
+		root->right=deletenode(root->right,data);
+	else{
+		if(root->count>=2){
+			root->count--;
+			return root;
+		}
+		else{
+			if(root->left==NULL || root->right==NULL){
+				struct node *temp=root->left?root->left:root->right;
+				if(temp==NULL){
+					temp=root;
+					root=NULL;
+				}
+				else{
+					*root=*temp;
+				}
+				free(temp);
+			}
+			else{
+				struct node *temp=minvalue(root->right);
+				root->data=temp->data;
+				root->right=deletenode(root->right,temp->data);
+			}
+		}
+	}
+	return root;
 }
 
 int main(){
 	struct node *root=NULL;
-	root=insert(root,20);
-	insert(root,8);
-	insert(root,22);
-	insert(root,4);	
-	insert(root,12);	
-	insert(root,10);	
-	insert(root,14);
-	cout<<"Inorder traversal of tree\n";	
-	inorder(root);
-	cout<<"LCA of 10 and 14: "<<lca(root,10,14)<<endl;
-	cout<<"LCA of 8 and 14: "<<lca(root,8,14)<<endl;
-	cout<<"LCA of 10 and 22: "<<lca(root,10,22)<<endl;
+	root = insert(root, 12); 
+    root = insert(root, 10); 
+    root = insert(root, 20); 
+    root = insert(root, 9); 
+    root = insert(root, 11); 
+    root = insert(root, 10); 
+    root = insert(root, 12); 
+    root = insert(root, 12);
+    cout<<"Inorder traversal of the tree\n";
+    inorder(root);
+
+    cout << "\nDelete 20\n"; 
+    root = deletenode(root, 20); 
+    cout << "Inorder traversal of the modified tree \n"; 
+    inorder(root); 
+  
+    cout << "\nDelete 12\n" ; 
+    root = deletenode(root, 12); 
+    cout << "Inorder traversal of the modified tree \n"; 
+    inorder(root); 
+  
+    cout << "\nDelete 9\n"; 
+    root = deletenode(root, 9); 
+    cout << "Inorder traversal of the modified tree \n"; 
+    inorder(root); 
 	return 0;
 }
